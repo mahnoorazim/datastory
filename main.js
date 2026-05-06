@@ -8,7 +8,7 @@ const svg = d3
 
 const projection = d3
   .geoOrthographic()
-  .scale(Math.min(width, height) * 0.33)
+  .scale(Math.min(width, height) * 0.56)
   .translate([width / 2, height / 2])
   .clipAngle(90);
 
@@ -23,6 +23,7 @@ const colors = {
   leisure: "#edc949"
 };
 
+
 const countryMeta = {
   Australia: { city: "Sydney", coords: [151.2093, -33.8688] },
   Japan: { city: "Tokyo", coords: [139.6917, 35.6895] },
@@ -32,9 +33,17 @@ const countryMeta = {
   Mexico: { city: "Mexico City", coords: [-99.1332, 19.4326] }
 };
 
+
 const shownCountries = new Set();
 let worldGeojson;
 let timeUseData;
+let hasActivatedSplit = false;
+
+const stickyPanel = document.getElementById("sticky-panel");
+const tooltip = d3.select("body")
+  .append("div")
+  .attr("class", "segment-tooltip")
+  .style("opacity", 0);
 
 const sphere = { type: "Sphere" };
 
@@ -84,8 +93,33 @@ Promise.all([
   timeUseData = csv;
 
   drawWorld();
+  drawGlobalLegend();
   setupScroller();
 });
+
+function drawGlobalLegend() {
+  const categories = [
+    { key: "sleep", label: "Sleep / Personal Care" },
+    { key: "work", label: "Paid Work / Study" },
+    { key: "unpaid", label: "Unpaid Work / Care" },
+    { key: "eating", label: "Eating / Drinking" },
+    { key: "travel", label: "Travel" },
+    { key: "leisure", label: "Leisure / Social" }
+  ];
+
+  const legend = d3
+    .select("#viz-right")
+    .insert("div", "#comparison-wall")
+    .attr("class", "global-legend");
+
+  categories.forEach(cat => {
+    const item = legend.append("div").attr("class", "legend-item");
+    item.append("span")
+      .attr("class", "legend-swatch")
+      .style("background", colors[cat.key]);
+    item.append("span").text(cat.label);
+  });
+}
 
 function drawWorld() {
   countriesLayer
@@ -115,6 +149,7 @@ function redrawGlobe(activeCountry = null) {
     .selectAll("text")
     .attr("x", d => projection(d.coords)[0] + 10)
     .attr("y", d => projection(d.coords)[1] + 4);
+
 }
 
 function rotateToCountry(countryName) {
@@ -126,7 +161,7 @@ function rotateToCountry(countryName) {
   const targetRotate = [-lon, -lat, 0];
 
   d3.transition()
-    .duration(1600)
+    .duration(1200)
     .tween("rotate", () => {
       const r = d3.interpolate(currentRotate, targetRotate);
       return t => {
@@ -135,8 +170,6 @@ function rotateToCountry(countryName) {
         drawCity(countryName);
       };
     });
-
-  d3.select("#country-label").text(`${meta.city}, ${countryName}`);
 }
 
 function drawCity(countryName) {
@@ -179,6 +212,47 @@ function drawCity(countryName) {
     );
 }
 
+function equivalentLine(key, hours) {
+  const mins = Math.round(hours * 60);
+  const base = {
+    sleep: { unit: 90, label: "sleep cycles" },
+    work: { unit: 50, label: "focused work blocks" },
+    unpaid: { unit: 30, label: "household/care tasks" },
+    eating: { unit: 30, label: "meal-length blocks" },
+    travel: { unit: 45, label: "urban commute legs" },
+    leisure: { unit: 60, label: "free-time hours" }
+  }[key];
+  const count = (mins / base.unit).toFixed(1);
+  return `Roughly ${count} ${base.label}.`;
+}
+
+function showSegmentTooltip(event, payload) {
+  const pct = ((payload.hours / 24) * 100).toFixed(1);
+  const eq = equivalentLine(payload.key, payload.hours);
+
+  tooltip
+    .html(
+      `<div class="tooltip-title">${payload.country} - ${payload.label}</div>
+       <div class="tooltip-metric"><strong>${payload.hours.toFixed(1)}h</strong> (${pct}% of day)</div>
+       <div class="tooltip-equivalent">${eq}</div>`
+    )
+    .style("opacity", 1);
+
+  moveSegmentTooltip(event);
+}
+
+function moveSegmentTooltip(event) {
+  const x = event.pageX + 14;
+  const y = event.pageY + 14;
+  tooltip
+    .style("left", `${x}px`)
+    .style("top", `${y}px`);
+}
+
+function hideSegmentTooltip() {
+  tooltip.style("opacity", 0);
+}
+
 function addCountryCard(countryName) {
   if (shownCountries.has(countryName)) return;
   shownCountries.add(countryName);
@@ -199,6 +273,7 @@ function addCountryCard(countryName) {
     .select("#comparison-wall")
     .append("div")
     .attr("class", "country-card")
+    .attr("data-country", countryName)
     .style("opacity", 0)
     .style("transform", "translateY(20px)");
 
@@ -206,12 +281,12 @@ function addCountryCard(countryName) {
 
   const cardWidth = document.getElementById("viz-right").clientWidth - 80;
   const timelineWidth = Math.max(280, cardWidth - 30);
-  const timelineHeight = 46;
+  const timelineHeight = 28;
 
   const timelineSvg = card
     .append("svg")
     .attr("width", timelineWidth)
-    .attr("height", 100);
+    .attr("height", 66);
 
   const x = d3.scaleLinear()
     .domain([0, 24])
@@ -220,13 +295,29 @@ function addCountryCard(countryName) {
   let cumulative = 0;
 
   categories.forEach(cat => {
+    const startHour = cumulative;
     timelineSvg
       .append("rect")
+      .attr("class", "timeline-segment")
       .attr("x", x(cumulative))
-      .attr("y", 8)
+      .attr("y", 7)
       .attr("width", 0)
       .attr("height", timelineHeight)
       .attr("fill", colors[cat.key])
+      .on("mouseenter", function(event) {
+        d3.select(this).attr("stroke", "rgba(255,255,255,0.9)").attr("stroke-width", 1.2);
+        showSegmentTooltip(event, {
+          country: countryName,
+          key: cat.key,
+          label: cat.label,
+          hours: cat.hours
+        });
+      })
+      .on("mousemove", moveSegmentTooltip)
+      .on("mouseleave", function() {
+        d3.select(this).attr("stroke", "none");
+        hideSegmentTooltip();
+      })
       .transition()
       .duration(700)
       .delay(cumulative * 40)
@@ -242,24 +333,23 @@ function addCountryCard(countryName) {
   timelineSvg
     .append("g")
     .attr("class", "axis")
-    .attr("transform", `translate(0, ${timelineHeight + 14})`)
+    .attr("transform", `translate(0, ${timelineHeight + 13})`)
     .call(axis);
-
-  const legend = card.append("div").attr("class", "legend");
-
-  categories.forEach(cat => {
-    const item = legend.append("div").attr("class", "legend-item");
-    item.append("span")
-      .attr("class", "legend-swatch")
-      .style("background", colors[cat.key]);
-    item.append("span").text(`${cat.label}: ${cat.hours}h`);
-  });
 
   card
     .transition()
     .duration(700)
     .style("opacity", 1)
     .style("transform", "translateY(0px)");
+}
+
+function activateSplitLayout() {
+  if (hasActivatedSplit) return false;
+  hasActivatedSplit = true;
+  document.body.classList.add("split-started");
+  stickyPanel.classList.remove("intro-mode");
+  stickyPanel.classList.add("split-active");
+  return true;
 }
 
 function setupScroller() {
@@ -274,8 +364,13 @@ function setupScroller() {
     .onStepEnter(response => {
       const step = response.element;
       const countryName = step.dataset.country;
+      const activatedNow = activateSplitLayout();
       rotateToCountry(countryName);
-      addCountryCard(countryName);
+      if (activatedNow) {
+        setTimeout(() => addCountryCard(countryName), 520);
+      } else {
+        addCountryCard(countryName);
+      }
     });
 
   window.addEventListener("resize", () => scroller.resize());
