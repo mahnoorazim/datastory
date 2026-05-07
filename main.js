@@ -8,7 +8,7 @@ const svg = d3
 
 const projection = d3
   .geoOrthographic()
-  .scale(Math.min(width, height) * 0.56)
+  .scale(Math.min(width, height) * 0.5)
   .translate([width / 2, height / 2])
   .clipAngle(90);
 
@@ -304,12 +304,12 @@ function addCountryCard(countryName) {
 
   const cardWidth = document.getElementById("viz-right").clientWidth - 80;
   const timelineWidth = Math.max(280, cardWidth - 30);
-  const timelineHeight = 28;
+  const timelineHeight = 22;
 
   const timelineSvg = card
     .append("svg")
     .attr("width", timelineWidth)
-    .attr("height", 66);
+    .attr("height", 56);
 
   const x = d3.scaleLinear()
     .domain([0, 24])
@@ -323,7 +323,7 @@ function addCountryCard(countryName) {
       .append("rect")
       .attr("class", "timeline-segment")
       .attr("x", x(cumulative))
-      .attr("y", 7)
+      .attr("y", 6)
       .attr("width", 0)
       .attr("height", timelineHeight)
       .attr("fill", colors[cat.key])
@@ -359,7 +359,7 @@ function addCountryCard(countryName) {
   timelineSvg
     .append("g")
     .attr("class", "axis")
-    .attr("transform", `translate(0, ${timelineHeight + 13})`)
+    .attr("transform", `translate(0, ${timelineHeight + 11})`)
     .call(axis);
 
   card
