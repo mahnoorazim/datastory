@@ -23,6 +23,28 @@ const colors = {
   leisure: "#edc949"
 };
 
+const genderTimeUseData = {
+  Australia: {
+    men: { paid: 304, unpaid: 172, personal: 649, leisure: 297, other: 18 },
+    women: { paid: 40, unpaid: 450, personal: 683, leisure: 241, other: 26 }
+  },
+  France: {
+    men: { paid: 235, unpaid: 135, personal: 743, leisure: 319, other: 8 },
+    women: { paid: 115, unpaid: 313, personal: 779, leisure: 221, other: 12 }
+  },
+  Japan: {
+    men: { paid: 442, unpaid: 47, personal: 632, leisure: 284, other: 34 },
+    women: { paid: 142, unpaid: 369, personal: 659, leisure: 224, other: 46 }
+  }
+};
+
+const genderCategories = [
+  { key: "paid", label: "Paid Work / Study" },
+  { key: "unpaid", label: "Unpaid Work" },
+  { key: "personal", label: "Personal Care" },
+  { key: "leisure", label: "Leisure" }
+];
+
 
 const countryMeta = {
   Australia: { city: "Sydney", coords: [151.2093, -33.8688] },
@@ -95,6 +117,7 @@ Promise.all([
   drawWorld();
   drawGlobalLegend();
   setupScroller();
+  initGenderExplorer();
 });
 
 function drawGlobalLegend() {
@@ -305,7 +328,10 @@ function addCountryCard(countryName) {
       .attr("height", timelineHeight)
       .attr("fill", colors[cat.key])
       .on("mouseenter", function(event) {
-        d3.select(this).attr("stroke", "rgba(255,255,255,0.9)").attr("stroke-width", 1.2);
+        d3.select(this)
+          .attr("stroke", "rgba(255,255,255,0.95)")
+          .attr("stroke-width", 1.4)
+          .attr("filter", "url(#glow)");
         showSegmentTooltip(event, {
           country: countryName,
           key: cat.key,
@@ -315,7 +341,7 @@ function addCountryCard(countryName) {
       })
       .on("mousemove", moveSegmentTooltip)
       .on("mouseleave", function() {
-        d3.select(this).attr("stroke", "none");
+        d3.select(this).attr("stroke", "none").attr("filter", null);
         hideSegmentTooltip();
       })
       .transition()
@@ -374,4 +400,93 @@ function setupScroller() {
     });
 
   window.addEventListener("resize", () => scroller.resize());
+}
+
+
+function initGenderExplorer() {
+  const picker = d3.select("#country-picker");
+  const container = d3.select("#gender-chart");
+  if (container.empty() || picker.empty()) return;
+
+  const tooltip = d3.select("body")
+    .append("div")
+    .attr("class", "gender-tooltip")
+    .style("opacity", 0);
+
+  const cardsWrap = container.append("div").attr("class", "gender-cards");
+  const toHours = mins => (mins / 60).toFixed(1);
+
+  function render(country) {
+    const rows = genderCategories.map(cat => ({
+      key: cat.key,
+      label: cat.label,
+      men: genderTimeUseData[country].men[cat.key],
+      women: genderTimeUseData[country].women[cat.key]
+    }));
+
+    const cards = cardsWrap
+      .selectAll(".gender-stat-card")
+      .data(rows, d => d.key);
+
+    const cardsEnter = cards.enter()
+      .append("div")
+      .attr("class", "gender-stat-card");
+
+    cardsEnter.append("div").attr("class", "stat-category");
+    cardsEnter.append("div").attr("class", "stat-lead");
+    const numberLine = cardsEnter.append("div").attr("class", "stat-number-line");
+    numberLine.append("span").attr("class", "stat-number");
+    numberLine.append("span").attr("class", "stat-unit").text("hours more");
+    cardsEnter.append("div").attr("class", "stat-delta");
+
+    const merged = cardsEnter.merge(cards);
+    merged.attr("data-key", d => d.key);
+
+    merged.select(".stat-category").text(d => d.label);
+    merged.select(".stat-lead").text(d => {
+      const gap = d.women - d.men;
+      if (gap === 0) return "Men and women spend";
+      return gap > 0 ? "Women spend" : "Men spend";
+    });
+    merged.select(".stat-number").text(d => {
+      const gap = Math.abs(d.women - d.men);
+      return gap === 0 ? "0.0" : toHours(gap);
+    });
+    merged.select(".stat-unit").text(d => {
+      const gap = Math.abs(d.women - d.men);
+      return gap === 0 ? "hours difference" : "hours more";
+    });
+    merged.select(".stat-delta").text(d => {
+      const gap = d.women - d.men;
+      if (gap === 0) return "Same amount of time";
+      return gap > 0 ? "more than men" : "more than women";
+    });
+
+    merged
+      .on("mouseenter", function(event, d) {
+        const menPct = ((d.men / 1440) * 100).toFixed(1);
+        const womenPct = ((d.women / 1440) * 100).toFixed(1);
+        tooltip
+          .style("opacity", 1)
+          .html(`<div class="tooltip-title">${country} - ${d.label}</div>
+                 <div class="tooltip-metric"><strong>Men:</strong> ${toHours(d.men)} hours (${d.men} minutes, ${menPct}%)</div>
+                 <div class="tooltip-metric"><strong>Women:</strong> ${toHours(d.women)} hours (${d.women} minutes, ${womenPct}%)</div>`);
+        d3.select(this).classed("is-hovered", true);
+      })
+      .on("mousemove", function(event) {
+        tooltip.style("left", `${event.pageX + 12}px`).style("top", `${event.pageY + 12}px`);
+      })
+      .on("mouseleave", function() {
+        tooltip.style("opacity", 0);
+        d3.select(this).classed("is-hovered", false);
+      });
+
+    cards.exit().remove();
+  }
+
+  picker.on("change", function() {
+    render(this.value);
+  });
+
+  render("Australia");
 }

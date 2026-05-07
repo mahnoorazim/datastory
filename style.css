@@ -27,8 +27,15 @@ body {
 }
 
 .hero h1 {
+  font-family: "Space Grotesk", Arial, Helvetica, sans-serif;
   font-size: clamp(2.5rem, 5vw, 4.5rem);
   margin-bottom: 1rem;
+  letter-spacing: 0.01em;
+}
+
+h2,
+h3 {
+  font-family: "Space Grotesk", Arial, Helvetica, sans-serif;
 }
 
 .hero p {
@@ -239,6 +246,207 @@ body.split-started .hero {
 
 .axis text {
   font-size: 9px;
+  fill: #dce6f2;
+}
+
+.axis line {
+  stroke: rgba(220,230,242,0.28);
+}
+
+.axis path {
+  stroke: rgba(220,230,242,0.4);
+}
+
+.country-card svg {
+  background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 4px 6px 2px 6px;
+}
+
+.timeline-segment {
+  transition: stroke 120ms ease, filter 120ms ease, opacity 120ms ease;
+}
+
+.timeline-segment:hover {
+  opacity: 0.97;
+}
+
+#gender-explorer {
+  padding: 5rem 1.5rem 6rem 1.5rem;
+  background: #050b14;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.explorer-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+#gender-explorer h2 {
+  margin: 0 0 0.45rem 0;
+  font-size: 2rem;
+}
+
+.explorer-subtitle {
+  margin: 0 0 1rem 0;
+  color: #ccdaea;
+}
+
+.explorer-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1.1rem;
+}
+
+.explorer-controls label {
+  font-size: 0.86rem;
+  color: #dce7f4;
+}
+
+.explorer-controls select {
+  background: #0f213d;
+  color: #f2f7fd;
+  border: 1px solid rgba(255,255,255,0.22);
+  border-radius: 7px;
+  padding: 0.42rem 0.62rem;
+}
+
+#gender-chart svg {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+}
+
+.men-label,
+.women-label {
+  fill: #eef4fb;
+  font-size: 11px;
+}
+
+.gap-label {
+  fill: #b6cbe5;
+  font-size: 10px;
+}
+
+.gender-tooltip {
+  position: absolute;
+  z-index: 9999;
+  padding: 0.55rem 0.65rem;
+  border-radius: 9px;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(8, 18, 35, 0.95);
+  color: #eef4fb;
+  box-shadow: 0 10px 22px rgba(0,0,0,0.45);
+  pointer-events: none;
+  transition: opacity 120ms ease;
+}
+
+.gender-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(260px, 1fr));
+  gap: 0.95rem;
+}
+
+.gender-stat-card {
+  position: relative;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 16px;
+  padding: 1.05rem 1.05rem 0.95rem 1.05rem;
+  transition: border-color 170ms ease, transform 170ms ease, box-shadow 170ms ease, background 170ms ease;
+  overflow: hidden;
+}
+
+.gender-stat-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: rgba(255,255,255,0.2);
+}
+
+.gender-stat-card.is-hovered {
+  border-color: rgba(255,255,255,0.32);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.25);
+}
+
+.gender-stat-card[data-key="paid"]::before {
+  background: #ff6b6b;
+}
+
+.gender-stat-card[data-key="unpaid"]::before {
+  background: #f1c453;
+}
+
+.gender-stat-card[data-key="personal"]::before {
+  background: #63c7ff;
+}
+
+.gender-stat-card[data-key="leisure"]::before {
+  background: #6fd08c;
+}
+
+.stat-category {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #f2f6fb;
+  margin-bottom: 0.5rem;
+}
+
+.stat-lead {
+  font-size: 0.78rem;
+  color: #b8cde4;
+  margin-bottom: 0.2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stat-number-line {
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
+}
+
+.stat-number {
+  font-size: 3rem;
+  font-weight: 900;
+  letter-spacing: 0.01em;
+  color: #ffffff;
+  line-height: 0.95;
+  text-shadow: 0 6px 22px rgba(255,255,255,0.16);
+}
+
+.stat-unit {
+  font-size: 0.86rem;
+  color: #d4e0ef;
+  font-weight: 600;
+}
+
+.stat-delta {
+  margin-top: 0.4rem;
+  font-size: 0.8rem;
+  color: #c6d7ea;
+}
+
+.gender-stat-card[data-key="paid"] .stat-number {
+  color: #ff8a8a;
+}
+
+.gender-stat-card[data-key="unpaid"] .stat-number {
+  color: #ffd166;
+}
+
+.gender-stat-card[data-key="personal"] .stat-number {
+  color: #7ed0ff;
+}
+
+.gender-stat-card[data-key="leisure"] .stat-number {
+  color: #7fe4a3;
 }
 
 @media (max-width: 980px) {

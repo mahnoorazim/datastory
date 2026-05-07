@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>How the World Spends Its Day</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script src="https://unpkg.com/topojson-client@3"></script>
@@ -33,51 +36,64 @@
 
     <section id="steps">
       <div class="step" data-country="Australia">
-        <h3>Sydney, Australia</h3>
+        <h3>Australia</h3>
         <p>
-          The story begins in Australia as the first place the sun greets as each day begins. In Sydney, the average person spends a significant portion of their day sleeping, followed by work and leisure activities. 
+          The story begins in Australia, where a large share of the day goes to sleep and personal care. Paid work is the next major block, but leisure still holds a meaningful portion of the day, creating a relatively balanced profile compared with the countries that follow.
         </p>
       </div>
 
       <div class="step" data-country="Japan">
-        <h3>Tokyo, Japan</h3>
+        <h3>Japan</h3>
         <p>
-          In Japan, time is divided differently. Sleep takes up less time while work, paid and unpaid, takes up more than in Australia. The pattern of daily life is already starting to look different...
+          In Japan, the schedule tightens. Sleep is lower than in Australia, while paid work and travel take a larger share, reflecting a more compressed workday rhythm. The result is a day that feels more work-centered, with less flexibility around rest and downtime.
         </p>
       </div>
 
       <div class="step" data-country="India">
-        <h3>Delhi, India</h3>
+        <h3>India</h3>
         <p>
-          South Asia brings another pattern of daily life shaped by its own social
-          and economic patterns. Compared to Japan, there is less time devoted to leisure and more time devoted to unpaid work, which includes household chores and caregiving.
+          India brings a stronger unpaid-work burden into focus. Time spent on household tasks and caregiving is comparatively high, which reduces room for leisure. This shift shows how responsibilities outside formal paid work can still dominate daily time budgets.
         </p>
       </div>
 
       <div class="step" data-country="France">
-        <h3>Paris, France</h3>
+        <h3>France</h3>
         <p>
-          Europe enters the scene in the form of France, where the time for leisure is more than in the previous two countries, and the time for paid work is the least of all countries we have explored. The average person in France spends as much time sleeping as in Sydney, much higher than Delhi and Tokyo.
+          France shows a different pattern, with more leisure and comparatively lower paid work time than several other countries in this story. Sleep also remains high, producing a profile that appears less time-pressured and more weighted toward recovery and personal life.
         </p>
       </div>
 
       <div class="step" data-country="South Africa">
-        <h3>Cape Town, South Africa</h3>
+        <h3>South Africa</h3>
         <p>
-          Africa adds another perspective. South Africa shows a mixed distribution of time, where care, work, and leisure all compete for space in the day. Still, leisure occupies the least amount of time of the explored countries, similar to India.
+          South Africa presents a mixed distribution where paid work, unpaid work, and care all compete for space in the same day. No single category dominates strongly, but leisure remains more limited than in high-leisure profiles, highlighting tradeoffs across essential activities.
         </p>
       </div>
 
       <div class="step" data-country="Mexico">
-        <h3>Mexico City, Mexico</h3>
+        <h3>Mexico</h3>
         <p>
-          The final stop brings the Americas into view in the form of New Mexico. The pattern of time use in Mexico is similar to that of South Africa, with a more even distribution of time across different activities. New Mexico has the least amount of time devoted to leisure, comparable to India and South Africa. The amount of time devoted to sleep is average as compared to the other countries, more than in Delhi and Tokyo but less than in Sydney and Paris.
+          Mexico closes the story with high unpaid work and relatively constrained leisure. Sleep stays near the middle of this country set, but the distribution shows how caregiving and household labor can absorb large blocks of the day even when paid work is moderate.
         </p>
       </div>
     </section>
   </main>
 
- 
+  <section id="gender-explorer">
+    <div class="explorer-inner">
+      <h2>Men vs Women Time Use Explorer</h2>
+      <p class="explorer-subtitle">Pick a country to compare average daily minutes across major activity groups.</p>
+      <div class="explorer-controls">
+        <label for="country-picker">Country</label>
+        <select id="country-picker">
+          <option value="Australia">Australia</option>
+          <option value="France">France</option>
+          <option value="Japan">Japan</option>
+        </select>
+      </div>
+      <div id="gender-chart"></div>
+    </div>
+  </section>
 
   <script src="main.js"></script>
 </body>
