@@ -109,7 +109,7 @@ const cityLayer = globeGroup.append("g");
 
 Promise.all([
   d3.json("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json"),
-  d3.csv("data/time_use.csv", d3.autoType)
+  d3.csv("data/time_use.csv?v=20260506-1", d3.autoType)
 ]).then(([world, csv]) => {
   worldGeojson = topojson.feature(world, world.objects.countries);
   timeUseData = csv;
